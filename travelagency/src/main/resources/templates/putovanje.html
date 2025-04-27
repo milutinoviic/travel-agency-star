@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      th:replace="~{layout :: layout(~{::title}, ~{::content}, ~{::links})}">
+<head>
+    <meta charset="UTF-8">
+    <title th:fragment="title">Putovanja</title>
+    <th:block th:fragment="links">
+    </th:block>
+</head>
+<body>
+<div th:fragment="content" class="container mt-5">
+
+    <div th:if="${error == 'Cannot Delete Trip With Reservation'}" class="alert alert-danger">
+        Putovanje ne može biti obrisano jer postoje  rezervacije za ovo putovanje.
+    </div>
+    <div th:if="${success == 'TripDeleted'}" class="alert alert-success">
+        Putovanje je uspešno obrisano.
+    </div>
+    <div th:if="${session.korisnik == null || session.korisnik.uloga != 'Manager'}">
+        <h2 style="text-align: center" class="mb-4">Aktuelne Ponude</h2>
+        <div class="row mb-4">
+            <div th:each="ponuda : ${promotivnePonude}" class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${ponuda.nazivDestinacije}">Destinacija</h5>
+                        <p class="card-text">
+                            <strong>Kategorija:</strong> <span th:text="${ponuda.kategorijaPutovanja.label}"></span><br>
+                            <strong>Prevozno Sredstvo:</strong> <span th:text="${ponuda.prevoznoSredstvo.label}"></span><br>
+                            <strong>Smeštaj:</strong> <span th:text="${ponuda.smestajnaJedinica.name()}"></span><br>
+                            <strong>Datum Polaska:</strong> <span th:text="${#temporals.format(ponuda.datumVremePolaska, 'dd-MM-yyyy HH:mm')}"></span><br>
+                            <strong>Datum Povratka:</strong> <span th:text="${#temporals.format(ponuda.datumVremePovratka, 'dd-MM-yyyy HH:mm')}"></span><br>
+                            <strong>Cena Aranžmana:</strong>
+                            <span th:if="${ponuda.procenatPopusta != null}">
+                            <del th:text="${ponuda.cenaAranzmana}"></del>
+                            <span th:text="${ponuda.cenaAranzmana - (ponuda.cenaAranzmana * ponuda.procenatPopusta / 100)}"></span>
+                            <span>(Popust: <span th:text="${ponuda.procenatPopusta}"></span>%
+                                od <span th:text="${#temporals.format(ponuda.datumPocetkaPopusta, 'dd-MM-yyyy')}"></span>
+                                do <span th:text="${#temporals.format(ponuda.datumKrajaPopusta, 'dd-MM-yyyy')}"></span>)
+                            </span>
+                        </span>
+                            <span th:if="${ponuda.procenatPopusta == null}" th:text="${ponuda.cenaAranzmana}"></span><br>
+                        </p>
+                        <a th:href="@{/putovanje/detail/{id}(id=${ponuda.id})}" class="btn btn-primary">Pogledaj Detalje</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <h2 style="text-align: center" class="mb-4">Pretraga Putovanja</h2>
+
+    <form th:action="@{/putovanje/search}" method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="nazivDestinacije" class="form-label">Naziv Destinacije</label>
+                <input type="text" class="form-control" id="nazivDestinacije" name="nazivDestinacije" placeholder="Unesite naziv destinacije">
+            </div>
+
+            <div class="col-md-4">
+                <label for="prevoznoSredstvo" class="form-label">Prevozno Sredstvo</label>
+                <select class="form-select" id="prevoznoSredstvo" name="prevoznoSredstvo">
+                    <option value="" disabled selected>Izaberite prevozno sredstvo</option>
+                    <option th:each="ps : ${tipoviPrevoznogSredstva}" th:value="${ps}" th:text="${ps.label}"></option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="kategorijaPutovanja" class="form-label">Kategorija Putovanja</label>
+                <select class="form-select" id="kategorijaPutovanja" name="kategorijaPutovanja">
+                    <option value="" disabled selected>Izaberite kategoriju putovanja</option>
+                    <option th:each="kp : ${kategorijePutovanja}" th:value="${kp}" th:text="${kp.label}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <label for="brojNocenja" class="form-label">Broj Noćenja</label>
+                <input type="number" class="form-control" id="brojNocenja" name="brojNocenja" placeholder="Unesite broj noćenja">
+            </div>
+
+            <div class="col-md-4">
+                <label for="minCena" class="form-label">Minimalna Cena</label>
+                <input type="number" step="0.01" class="form-control" id="minCena" name="minCena" placeholder="Minimalna cena">
+            </div>
+
+            <div class="col-md-4">
+                <label for="maxCena" class="form-label">Maksimalna Cena</label>
+                <input type="number" step="0.01" class="form-control" id="maxCena" name="maxCena" placeholder="Maksimalna cena">
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <label for="sortOrder" class="form-label">Sortiraj Po</label>
+                <select class="form-select" id="sortOrder" name="sortOrder">
+                    <option value="" disabled selected>Izaberite opciju sortiranja</option>
+                    <option value="nazivDestinacije">Nazivu Destinacije</option>
+                    <option value="cena">Ceni</option>
+                    <option value="brojNocenja">Broju Noćenja</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-12 text-center">
+                <button type="submit" class="btn btn-primary">Pretraga</button>
+            </div>
+        </div>
+    </form>
+
+    <h2 style="text-align: center" class="mb-4">Putovanja</h2>
+
+    <div class="row">
+        <div th:each="putovanje : ${putovanja}" class="col-md-4">
+            <div class="card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${putovanje.nazivDestinacije}">Destinacija</h5>
+                        <p class="card-text">
+                            <strong>Kategorija:</strong> <span th:text="${putovanje.kategorijaPutovanja.label}"></span><br>
+                            <strong>Prevozno Sredstvo:</strong> <span th:text="${putovanje.prevoznoSredstvo.label}"></span><br>
+                            <strong>Smeštaj:</strong> <span th:text="${putovanje.smestajnaJedinica.name()}"></span><br>
+                            <strong>Datum Polaska:</strong> <span th:text="${#temporals.format(putovanje.datumVremePolaska, 'dd-MM-yyyy HH:mm')}"></span><br>
+                            <strong>Datum Povratka:</strong> <span th:text="${#temporals.format(putovanje.datumVremePovratka, 'dd-MM-yyyy HH:mm')}"></span><br>
+                            <strong>Cena Aranžmana:</strong>
+                            <span th:if="${putovanje.procenatPopusta != null}">
+                        <del th:text="${putovanje.cenaAranzmana}"></del>
+                            <span th:text="${putovanje.cenaAranzmana - (putovanje.cenaAranzmana * putovanje.procenatPopusta / 100)}"></span>
+                            <span>(Popust: <span th:text="${putovanje.procenatPopusta}"></span>%
+                                od <span th:text="${#temporals.format(putovanje.datumPocetkaPopusta, 'dd-MM-yyyy')}"></span>
+                                do <span th:text="${#temporals.format(putovanje.datumKrajaPopusta, 'dd-MM-yyyy')}"></span>)
+                            </span>
+                            </span>
+                            <span th:if="${putovanje.procenatPopusta == null}" th:text="${putovanje.cenaAranzmana}"></span><br>
+                        </p>
+                        <a th:href="@{/putovanje/detail/{id}(id=${putovanje.id})}" class="btn btn-primary">Pogledaj Detalje</a>
+                        <a th:if="${session.korisnik != null and session.korisnik.uloga == 'Manager'}"
+                           th:href="@{/putovanje/delete/{id}(id=${putovanje.id})}"
+                           class="btn btn-danger ml-2">Obriši</a>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

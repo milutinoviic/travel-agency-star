@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:replace="~{layout :: layout(~{::title}, ~{::content}, ~{::links})}">
+<head>
+    <meta charset="UTF-8">
+    <title th:fragment="title">Detalji Putovanja</title>
+    <th:block th:fragment="links">
+    </th:block>
+</head>
+<body>
+<div th:fragment="content" class="container mt-5">
+    <h2 style="text-align: center" class="mb-4" th:text="'Lokacija: ' + ${putovanje.nazivDestinacije}"></h2>
+
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text">
+                <strong>Kategorija:</strong> <span th:text="${putovanje.kategorijaPutovanja.label}"></span><br>
+                <strong>Prevozno Sredstvo:</strong> <span th:text="${putovanje.prevoznoSredstvo.label}"></span><br>
+                <strong>Smeštaj:</strong> <span th:text="${putovanje.smestajnaJedinica.name()}"></span><br>
+                <strong>Datum Polaska:</strong> <span th:text="${#temporals.format(putovanje.datumVremePolaska, 'dd-MM-yyyy HH:mm')}"></span><br>
+                <strong>Datum Povratka:</strong> <span th:text="${#temporals.format(putovanje.datumVremePovratka, 'dd-MM-yyyy HH:mm')}"></span><br>
+                <strong>Broj Noćenja:</strong> <span th:text="${putovanje.brojNocenja}"></span><br>
+                <strong>Cena Aranžmana:</strong>
+                <span th:if="${putovanje.procenatPopusta != null}">
+                    <del th:text="${putovanje.cenaAranzmana}"></del>
+                    <span th:text="${putovanje.cenaAranzmana - (putovanje.cenaAranzmana * putovanje.procenatPopusta / 100)}"></span>
+                    <span>(Popust: <span th:text="${putovanje.procenatPopusta}"></span>%
+                        od <span th:text="${#temporals.format(putovanje.datumPocetkaPopusta, 'dd-MM-yyyy')}"></span>
+                        do <span th:text="${#temporals.format(putovanje.datumKrajaPopusta, 'dd-MM-yyyy')}"></span>)
+                    </span>
+                </span>
+                <span th:if="${putovanje.procenatPopusta == null}" th:text="${putovanje.cenaAranzmana}"></span><br>
+                <strong>Ukupan Broj Mesta:</strong> <span th:text="${putovanje.ukupanBrojMesta}"></span><br>
+                <strong>Broj Slobodnih Mesta:</strong> <span th:text="${putovanje.brojSlobodnihMesta}"></span><br>
+            </p>
+
+            <div th:if="${session.korisnik != null}">
+                <div th:if="${session.korisnik.uloga == 'Manager'}">
+                    <a th:href="@{/putovanje/edit/{id}(id=${putovanje.id})}"
+                       th:classappend="${hasReservations ? 'disabled' : ''}"
+                       class="btn btn-warning">Izmeni</a>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#discountModal">
+                        Dodaj Popust
+                    </button>
+                </div>
+            </div>
+            <div th:if="${session.korisnik == null || session.korisnik.uloga != 'Manager'}">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#rezervacijaModal">
+                    Rezerviši Putovanje
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="discountModal" tabindex="-1" aria-labelledby="discountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="discountModalLabel">Dodaj Popust</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/putovanje/addDiscount}" method="post">
+                        <input type="hidden" name="id" th:value="${putovanje.id}"/>
+                        <div class="mb-3">
+                            <label for="procenatPopusta" class="form-label">Procenat Popusta (%)</label>
+                            <input type="number" class="form-control" id="procenatPopusta" name="procenatPopusta" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="datumPocetkaPopusta" class="form-label">Datum Početka Popusta</label>
+                            <input type="datetime-local" class="form-control" id="datumPocetkaPopusta" name="datumPocetkaPopusta" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="datumKrajaPopusta" class="form-label">Datum Kraja Popusta</label>
+                            <input type="datetime-local" class="form-control" id="datumKrajaPopusta" name="datumKrajaPopusta" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Dodaj Popust</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rezervacijaModal" tabindex="-1" aria-labelledby="rezervacijaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rezervacijaModalLabel">Rezervišite Putovanje</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/rezervacija/create}" method="post">
+                        <input type="hidden" name="putovanjeId" th:value="${putovanje.id}">
+                        <div class="mb-3">
+                            <label for="brojPutnika" class="form-label">Broj Putnika</label>
+                            <input type="number" class="form-control" id="brojPutnika" name="brojPutnika" min="1" th:attr="max=${putovanje.brojSlobodnihMesta}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Rezerviši</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

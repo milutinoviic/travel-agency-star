@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      th:fragment="layout (title, content, links)">
+<head>
+    <meta charset="UTF-8">
+    <title th:replace="${title}">Gas</title>
+    <base th:href="@{/}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <th:block th:replace="${links}"></th:block>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/putovanje">Home</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li th:if="${session.korisnik != null and session.korisnik.uloga == 'Manager'}">
+                    <a class="dropdown-item active" href="/putovanje/add" th:text="'Dodaj putovanje'"></a>
+                </li>
+            </ul>
+            <div class="dropdown ms-auto">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownOpcijeButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    Opcije
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownOpcijeButton">
+                    <li th:if="${session.korisnik != null}">
+                        <a class="dropdown-item active" href="/profile" th:text="'Profil'"></a>
+                    </li>
+                    <li th:if="${session.korisnik == null}">
+                        <a class="dropdown-item active" href="/login" th:text="'Login'"></a>
+                    </li>
+                    <li th:if="${session.korisnik == null}">
+                        <a class="dropdown-item" href="/registracija" th:text="'Registracija'"></a>
+                    </li>
+                    <li th:if="${session.korisnik != null}">
+                        <form action="/login/logout" method="get" style="margin: 0;">
+                            <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;" th:text="'Logout'"></button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+<main th:replace="${content}">Zamenski sadrzaj</main>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      th:replace="~{layout :: layout(~{::title}, ~{::content}, ~{::links})}">
+<head>
+    <meta charset="UTF-8">
+    <title th:fragment="title">Profil</title>
+    <th:block th:fragment="links">
+        <script type="text/javascript" src="/js/profile.js"></script>
+    </th:block>
+</head>
+<body>
+<div th:fragment="content">
+    <h2>Profil korisnika</h2>
+
+    <form th:action="@{/profile/update}" th:object="${korisnik}" method="post" onsubmit="return validateForm()">
+        <div class="mb-3">
+            <label for="ime" class="form-label">Ime</label>
+            <input type="text" class="form-control" id="ime" th:field="*{ime}">
+        </div>
+        <div class="mb-3">
+            <label for="prezime" class="form-label">Prezime</label>
+            <input type="text" class="form-control" id="prezime" th:field="*{prezime}">
+        </div>
+        <div class="mb-3">
+            <label for="emailAdresa" class="form-label">Email adresa</label>
+            <input type="email" class="form-control" id="emailAdresa" th:field="*{emailAdresa}" required>
+        </div>
+        <div class="mb-3">
+            <label for="adresa" class="form-label">Adresa</label>
+            <input type="text" class="form-control" id="adresa" th:field="*{adresa}">
+        </div>
+        <div class="mb-3">
+            <label for="brojTelefona" class="form-label">Broj telefona</label>
+            <input type="text" class="form-control" id="brojTelefona" th:field="*{brojTelefona}">
+        </div>
+        <div class="mb-3">
+            <label for="newPassword" class="form-label">Nova lozinka</label>
+            <input type="password" class="form-control" id="newPassword" name="newPassword">
+        </div>
+        <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Potvrdite lozinku</label>
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+        </div>
+        <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+        <button type="submit" class="btn btn-primary">Sačuvaj promene</button>
+    </form>
+
+    <div th:if="${session.korisnik.uloga != 'Manager'}">
+    <h3>Buduće rezervacije</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Putovanje</th>
+            <th>Datum Rezervacije</th>
+            <th>Broj Putnika</th>
+            <th>Ukupna Cena</th>
+            <th>Akcije</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${buduceRezervacije}">
+            <td th:text="${item.rezervacija.putovanje.nazivDestinacije}"></td>
+            <td th:text="${#temporals.format(item.rezervacija.datumRezervacije, 'dd-MM-yyyy HH:mm')}"></td>
+            <td th:text="${item.rezervacija.brojPutnika}"></td>
+            <td th:text="${item.rezervacija.totalPrice}"></td>
+            <td>
+                <form th:action="@{/profile/cancelReservation}" method="post">
+                    <input type="hidden" name="rezervacijaId" th:value="${item.rezervacija.id}"/>
+                    <button type="submit" class="btn btn-danger" th:disabled="${!item.canCancel}">
+                        Otkazivanje
+                    </button>
+                </form>
+            </td>
+        </tr>
+
+
+        </tbody>
+    </table>
+
+    <h3>Prošle rezervacije</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Putovanje</th>
+            <th>Datum Rezervacije</th>
+            <th>Broj Putnika</th>
+            <th>Ukupna Cena</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rezervacija : ${prosleRezervacije}">
+            <td th:text="${rezervacija.putovanje.nazivDestinacije}"></td>
+            <td th:text="${#temporals.format(rezervacija.datumRezervacije, 'dd-MM-yyyy HH:mm')}"></td>
+            <td th:text="${rezervacija.brojPutnika}"></td>
+            <td th:text="${rezervacija.totalPrice}"></td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+</div>
+</body>
+</html>

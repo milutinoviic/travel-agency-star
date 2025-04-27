@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      th:replace="~{layout :: layout(~{::title}, ~{::content}, ~{::links})}">
+<head>
+    <meta charset="UTF-8">
+    <title th:fragment="title">Dodaj Putovanje</title>
+    <th:block th:fragment="links">
+        <script defer type="text/javascript" src="/js/putovanjeAdd.js"></script>
+    </th:block>
+</head>
+<body>
+<div th:fragment="content" class="container mt-5">
+    <h2 style="text-align: center" class="mb-4">Dodaj Novo Putovanje</h2>
+    <form th:action="@{/putovanje/add}" th:object="${putovanje}" method="post" onsubmit="return validateForm();">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="prevoznoSredstvo" class="form-label">Prevozno Sredstvo</label>
+                <select class="form-select" id="prevoznoSredstvo" th:field="*{prevoznoSredstvo}">
+                    <option value="Izaberite" disabled selected>Izaberite prevozno sredstvo</option>
+                    <option th:each="ps : ${prevoznaSredstva}" th:value="${ps}" th:text="${ps.label}"></option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label for="smestajnaJedinica" class="form-label">Smeštajna Jedinica</label>
+                <select class="form-select" id="smestajnaJedinica" th:field="*{smestajnaJedinica}">
+                    <option value="" disabled selected>Izaberite smeštajnu jedinicu</option>
+                    <option th:each="sj : ${smestajneJedinice}" th:value="${sj}" th:text="${sj.name()}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="nazivDestinacije" class="form-label">Naziv Destinacije</label>
+            <input type="text" class="form-control" id="nazivDestinacije" th:field="*{nazivDestinacije}" placeholder="Unesite naziv destinacije">
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="kategorijaPutovanja" class="form-label">Kategorija Putovanja</label>
+                <select class="form-select" id="kategorijaPutovanja" th:field="*{kategorijaPutovanja}">
+                    <option value="" disabled selected>Izaberite kategoriju putovanja</option>
+                    <option th:each="kp : ${kategorijePutovanja}" th:value="${kp}" th:text="${kp.label}"></option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="datumVremePolaska" class="form-label">Datum i Vreme Polaska</label>
+                <input type="datetime-local" class="form-control" id="datumVremePolaska" th:field="*{datumVremePolaska}">
+            </div>
+
+            <div class="col-md-3">
+                <label for="datumVremePovratka" class="form-label">Datum i Vreme Povratka</label>
+                <input type="datetime-local" class="form-control" id="datumVremePovratka" th:field="*{datumVremePovratka}">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="brojNocenja" class="form-label">Broj Noćenja</label>
+                <input type="number" class="form-control" id="brojNocenja" th:field="*{brojNocenja}" placeholder="Unesite broj noćenja">
+            </div>
+
+            <div class="col-md-4">
+                <label for="cenaAranzmana" class="form-label">Cena Aranžmana</label>
+                <input type="number" step="0.01" class="form-control" id="cenaAranzmana" th:field="*{cenaAranzmana}" placeholder="Unesite cenu aranžmana">
+            </div>
+
+            <div class="col-md-4">
+                <label for="ukupanBrojMesta" class="form-label">Ukupan Broj Mesta</label>
+                <input type="number" class="form-control" id="ukupanBrojMesta" th:field="*{ukupanBrojMesta}" placeholder="Unesite ukupan broj mesta">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="brojSlobodnihMesta" class="form-label">Broj Slobodnih Mesta</label>
+            <input type="number" class="form-control" id="brojSlobodnihMesta" th:field="*{brojSlobodnihMesta}" placeholder="Unesite broj slobodnih mesta">
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger mt-3" role="alert" th:text="${errorMessage}"></div>
+
+        <button type="submit" class="btn btn-primary">Dodaj Putovanje</button>
+    </form>
+</div>
+</body>
+</html>
